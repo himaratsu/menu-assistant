@@ -36,24 +36,22 @@ export default async function handler(req: NextRequest) {
   if (priceLessThan) {
     parameterStrings.push(`price[less_than]${priceLessThan}`);
   }
-  const filterString = parameterStrings.join("[and]");
+  const filters = parameterStrings.join("[and]");
 
-  // microCMS JS SDKを使ってデータを取得する
-  const { createClient } = require("microcms-js-sdk");
-  const client = createClient({
-    serviceDomain: "room-service-him",
-    apiKey: process.env.MICROCMS_API_KEY,
-  });
+  const fetch = require("node-fetch");
 
-  // 金額、ジャンルでフィルタする
-  const data = await client.get({
-    endpoint: "menus",
-    queries: {
-      filters: filterString,
-    },
-  });
+  const serviceDomain = "room-service-him";
+  const apiKey = process.env.MICROCMS_API_KEY;
+  const endpoint = "menus";
 
-  console.log(data);
+  const url = `https://${serviceDomain}.microcms.io/api/v1/${endpoint}?filters=${filters}`;
+
+  const headers = {
+    "X-API-KEY": apiKey,
+  };
+
+  const response = await fetch(url, { headers });
+  const data = await response.json();
 
   const menuStrings = data.contents.map((menu: any) => {
     return `メニュー名: ${menu.name}
@@ -63,7 +61,6 @@ export default async function handler(req: NextRequest) {
 ----------
 `;
   });
-  console.log(menuStrings);
 
   const prompt = `あなたはユーザーの質問に答えるアシスタントです。
   ルームサービスのメニューについての質問に答えてください。メニューの特徴を添えると喜ばれます。

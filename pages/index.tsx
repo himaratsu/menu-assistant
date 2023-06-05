@@ -61,7 +61,7 @@ export default function Home() {
     console.log(priceGreaterThan);
     console.log(genre);
 
-    const response = await fetch("/api/praise", {
+    const response = await fetch("/api/answer", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
